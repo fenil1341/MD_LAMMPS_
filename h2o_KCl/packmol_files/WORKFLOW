@@ -1,0 +1,42 @@
+## Steps for .data file
+#### 1. Create `(.pdb)` file for a single molecule  --> molstruct.pdb
+
+```
+HEADER    water
+COMPND
+SOURCE
+HETATM    1  H   HOH     1       4.225   5.600  5.000
+HETATM    2  H   HOH     1       5.775   5.600  5.000
+HETATM    3  O   HOH     1       5.000   5.000  5.000
+CONECT    1    3
+CONECT    2    3
+CONECT    3    1    2
+END
+```
+
+#### 2. Write a `fill.inp` file and use in UBUNTU ```packmol < fill.inp```. This will give a (.pdb) file containing bunch of molecules.
+
+```
+tolerance 2.0
+filetype pdb
+output water_box.pdb
+add_box_sides 1.0         ## adds CRYST1 record automatically
+
+structure molstruct.pdb
+  number 100
+  inside cube 0. 0. 0. 20.
+end structure
+
+```
+
+
+#### 3. Using `VMD`, open TK console and input these commands
+
+```
+package require topotools
+topo guessatom element mass
+topo guessbonds
+topo guessangles
+topo writelammpsdata F:\\sla_hiwi\\lammps_testRuns\\h2o_KCl\\packmol_files\\h2o.data full
+
+```

@@ -1,0 +1,9 @@
+tolerance 2.0
+filetype pdb
+
+output h2o.pdb
+
+structure molstruct.pdb 
+  number 100 
+  inside cube 0. 0. 0. 100. 
+end structure

@@ -1,2 +1,10 @@
-1. https://m3g.github.io/packmol/userguide.shtml      ## Initial Configuration of the molecules(.pdb file) for the simulation.
-2. 
+1. PackMol - Initial Configuration of the molecules(.pdb file) for the simulation.
+
+    https://m3g.github.io/packmol/userguide.shtml 
+
+2. TopoTools in VMD:
+
+    Axel Kohlmeyer & Josh Vermaas, (2019). TopoTools: Release 1.8
+    
+    https://doi.org/10.5281/zenodo.598373
+3. 
