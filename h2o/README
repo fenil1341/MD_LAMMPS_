@@ -1,0 +1,241 @@
+# Water Channel MD Simulation — My Personal Notes
+
+setup: 10 water molecules Temperature is kept at 300 K (room temperature).
+
+---
+## What Each File Does
+
+| File | Created by | Purpose |
+|---|---|---|
+| `generate_water.py` | Me (Python) | Places 10 water molecules randomly in the box, writes the .data file |
+| `water_channel.data` | generate_water.py | Starting structure |
+| `water_channel.in` | Me (text editor) | Instruction script for LAMMPS |
+| `log.lammps` | LAMMPS | Log of everything printed to terminal during the run. |
+| `traj.lammpstrj` | LAMMPS | Trajectory file: atom positions saved every 100 steps. Open in OVITO. |
+
+---
+## The Simulation Box
+
+```
+Box dimensions:
+  X = 20 Angstroms   (flow direction — periodic)
+  Y = 10 Angstroms   (channel height — walls at top and bottom)
+  Z = 10 Angstroms   (depth — periodic)
+```
+
+One Angstrom (Å) = 0.1 nanometres = 0.0000000001 metres.
+A water molecule is about 2.8 Å across.
+So this box fits roughly 3–4 molecules in each direction. It is **extremely tiny**.
+
+---
+
+## Boundary Conditions — What Happens at the Edges
+
+This is one of the most important concepts in MD.
+
+| Direction | Type | What it means |
+|---|---|---|
+| X (left/right) | Periodic (`p`) | Molecule leaving right reappears on left. Mimics an infinitely long channel. |
+| Y top | Reflecting wall (`wall/reflect yhi`) | Hard wall. Molecules bounce off elastically. |
+| Y bottom | Reflecting wall (`wall/reflect ylo`) | Mirror/symmetry plane. Also acts as a hard wall. |
+| Z (front/back) | Periodic (`p`) | Same as X. Wraps around. Mimics infinite depth. |
+
+The LAMMPS line that sets this is:
+```
+boundary   p f p
+```
+- `p` = periodic
+- `f` = fixed (non-periodic, we handle it manually with walls)
+
+The walls are set with:
+```
+fix  WALL_TOP  all wall/reflect yhi EDGE
+fix  WALL_BOT  all wall/reflect ylo EDGE
+```
+`yhi` = top face of box, `ylo` = bottom face. `EDGE` means exactly at the box boundary.
+
+---
+
+## The Water Model — SPC/E
+
+**SPC/E** (Simple Point Charge — Extended). It is the most widely used
+water model in engineering MD and is good for bulk water properties at room temperature.
+
+### SPC/E molecule geometry (rigid, never changes shape)
+
+
+- O–H bond length: **1.0 Å**
+- H–O–H angle: **109.47 degrees**
+- The molecule is **completely rigid** — it never bends or stretches during simulation
+
+| Atom | Type | Charge |
+|---|---|---|
+| Oxygen | 1 | −0.8476 e |
+| Hydrogen | 1 | +0.4238 e each |
+
+---
+
+## The Force Field — How Atoms Interact
+
+The force field is the set of equations describing how atoms push and pull each other.
+I am using `lj/cut/coul/cut` which has two components:
+
+### 1. Lennard-Jones (LJ) potential — van der Waals forces
+
+Handles the physical size of atoms and weak attraction between them.
+- At very short range: **strong repulsion** (atoms cannot overlap)
+- At medium range: **weak attraction** (van der Waals)
+- Beyond 10 Å: **ignored** (cutoff)
+
+In SPC/E, only **Oxygen–Oxygen** pairs have LJ interactions.
+Hydrogen has no LJ parameters (it is essentially a point charge in this model).
+
+```
+pair_coeff   1 1   0.15535  3.16600    # O-O: epsilon=0.15535 kcal/mol, sigma=3.166 Å
+pair_coeff   2 2   0.00000  0.00000    # H-H: no LJ
+pair_coeff   1 2   0.00000  0.00000    # O-H: no LJ
+```
+
+- `epsilon` = depth of the energy well (how strong the attraction is)
+- `sigma` = distance at which the LJ potential is zero (roughly the atom diameter)
+
+### 2. Coulomb (electrostatic) potential — charge interactions
+
+Handles the attraction between opposite partial charges (O and H from different molecules)
+and repulsion between same charges (H...H). This is what creates hydrogen bonds.
+
+I am using a **simple cutoff Coulomb** (`coul/cut`) with a 10 Å cutoff.
+This means: beyond 10 Å, electrostatic interactions are ignored.
+
+> Note: cutoff Coulomb is not the most accurate method for bulk water, but it works
+> for this basic simulation. For better accuracy, PPPM or Ewald summation is used
+> (we will upgrade to that later).
+
+---
+
+## SHAKE — Keeping Water Rigid
+
+SPC/E water is supposed to be rigid, but LAMMPS by default lets all atoms move freely.
+The **SHAKE algorithm** enforces the rigid geometry by constraining bond lengths and angles
+every timestep.
+
+```
+fix  SHAKE  all shake 0.0001 100 0 b 1 a 1
+```
+
+- `b 1` = constrain all bonds of type 1 (O–H bonds)
+- `a 1` = constrain all angles of type 1 (H–O–H angle)
+- `0.0001` = convergence tolerance
+- `100` = maximum iterations per timestep
+
+Why use SHAKE? Because without it, the fast O–H bond vibration (~3500 cm⁻¹) would
+require a very small timestep (~0.5 fs). SHAKE removes this vibration and lets us
+use a larger timestep of **2 fs**, making the simulation 4× faster.
+
+---
+
+## The Thermostat — NVT Ensemble
+
+I am running in the **NVT ensemble**:
+- **N** = Number of atoms is constant (no atoms created or destroyed)
+- **V** = Volume is constant (box size does not change)
+- **T** = Temperature is controlled (kept near 300 K)
+
+```
+fix  NVT  all nvt temp 300.0 300.0 100.0
+```
+
+- First `300.0` = starting target temperature (K)
+- Second `300.0` = ending target temperature (K)
+- `100.0` = thermostat damping time (femtoseconds)
+
+The thermostat used is **Nosé–Hoover**. It works by coupling the system to a
+"heat bath" — if the system gets too hot, kinetic energy is removed; if too cold,
+energy is added. The 100 fs damping time controls how quickly temperature is corrected.
+Too small = unphysical oscillations. Too large = poor temperature control.
+
+---
+
+
+
+## The data file — water_channel.data
+
+This file tells LAMMPS the **initial state** of the system.
+
+```
+30 atoms          <- 10 molecules × 3 atoms each
+20 bonds          <- 10 molecules × 2 O-H bonds each
+10 angles         <- 10 molecules × 1 H-O-H angle each
+
+2 atom types      <- type 1 = Oxygen, type 2 = Hydrogen
+1 bond types      <- type 1 = O-H bond
+1 angle types     <- type 1 = H-O-H angle
+
+0.0 20.0 xlo xhi  <- box goes from x=0 to x=20 Å
+0.0 10.0 ylo yhi  <- box goes from y=0 to y=10 Å
+0.0 10.0 zlo zhi  <- box goes from z=0 to z=10 Å
+```
+
+Each atom line:
+```
+atom_id  mol_id  atom_type  charge   x        y        z
+1        1       1          -0.8476  7.992    7.704    6.391   <- Oxygen of molecule 1
+2        1       2           0.4238  7.176    7.126    6.391   <- H1 of molecule 1
+3        1       2           0.4238  8.809    7.126    6.391   <- H2 of molecule 1
+```
+
+---
+
+## The Input Script — water_channel.in (line by line)
+
+```lammps
+units           real
+```
+Use "real" units: distance in Å, time in femtoseconds, energy in kcal/mol, temp in Kelvin.
+
+```lammps
+atom_style      full
+```
+"full" style stores: atom ID, molecule ID, atom type, charge, x, y, z.
+Required for charged molecular systems like water.
+
+```lammps
+boundary        p f p
+```
+X = periodic, Y = fixed (we add walls manually), Z = periodic.
+
+```lammps
+pair_style      lj/cut/coul/cut 10.0
+```
+LJ + cutoff Coulomb, both with 10 Å cutoff.
+
+```lammps
+read_data       water_channel.data
+```
+Load the starting structure.
+
+```lammps
+minimize        1.0e-4 1.0e-6 500 5000
+```
+Before running dynamics, minimise energy first. This moves overlapping molecules apart.
+Without this, the initial forces are so large that molecules explode out of the box
+(we learned this the hard way — the "Lost atoms" error).
+
+```lammps
+timestep        2.0
+run             1000
+```
+Each step = 2 femtoseconds. Run for 1000 steps = 2 picoseconds total simulation time.
+
+---
+
+## Errors and What They Meant
+
+| Error | Cause | Fix |
+|---|---|---|
+| `Cannot use non-periodic boundaries with PPPM` | PPPM requires all 3 directions to be periodic, but Y was set to `f` | Switched to cutoff Coulomb (`coul/cut`) which has no periodicity requirement |
+| `Cannot use fix wall/reflect in periodic dimension` | `wall/reflect` does not work in a periodic direction | Set Y to `f` (fixed) in the boundary command |
+| `Missing argument for fix wall/lj93` | `EDGE` keyword only works with `wall/reflect`, not `wall/lj93` | Used `wall/reflect` with `boundary p f p` instead |
+| `Lost atoms: original 30 current 24` | Initial atom positions had molecules too close together — forces were explosive | Added energy minimisation step before the MD run |
+
+--
