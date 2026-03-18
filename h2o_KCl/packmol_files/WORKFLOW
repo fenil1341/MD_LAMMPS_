@@ -1,5 +1,5 @@
 ## Steps for .data file
-#### 1. Create `(.pdb)` file for a single molecule  --> molstruct.pdb
+#### 1. Create `(.pdb)` file for a single molecule  --> `h2o.pdb`, `K.pdb`, `Cl.pdb`
 
 ```
 HEADER    water
@@ -14,19 +14,38 @@ CONECT    3    1    2
 END
 ```
 
+```
+HETATM    1  K   POT     1       0.000   0.000   0.000
+END
+```
+
+```
+HETATM    1  CL  CLA     1       0.000   0.000   0.000
+END
+```
+
 #### 2. Write a `fill.inp` file and use in UBUNTU ```packmol < fill.inp```. This will give a (.pdb) file containing bunch of molecules.
 
 ```
 tolerance 2.0
 filetype pdb
-output water_box.pdb
-add_box_sides 1.0         ## adds CRYST1 record automatically
+output water_kcl.pdb
+add_box_sides 1.0 
 
-structure molstruct.pdb
-  number 100
-  inside cube 0. 0. 0. 20.
+structure h2o.pdb
+  number 33000
+  inside box 0. 0. 0. 100. 100. 100.
 end structure
 
+structure K.pdb
+  number 60
+  inside box 0. 0. 0. 100. 100. 100.
+end structure
+
+structure Cl.pdb
+  number 60
+  inside box 0. 0. 0. 100. 100. 100.
+end structure
 ```
 
 
@@ -37,6 +56,13 @@ package require topotools
 topo guessatom element mass
 topo guessbonds
 topo guessangles
-topo writelammpsdata F:\\sla_hiwi\\lammps_testRuns\\h2o_KCl\\packmol_files\\h2o.data full
+topo writelammpsdata F:\\sla_hiwi\\lammps_testRuns\\h2o_KCl\\packmol_files\\water_kcl.data full
 
 ```
+## Steps for Lammps input file
+
+
+## Computational Time
+|Task|Time|
+|------|-----|
+|For computing `water_kcl.pdb` file | ~ 1 min |

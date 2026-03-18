@@ -1,0 +1,10 @@
+units real
+atom_style full
+boundary p f p
+
+read_data water_kcl.data
+
+set type 1 charge -0.8476   # O
+set type 2 charge  0.4238   # H
+set type 3 charge  1.0      # K+
+set type 4 charge -1.0      # Cl-

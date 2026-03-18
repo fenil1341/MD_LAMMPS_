@@ -1,0 +1,9 @@
+tolerance 2.0
+filetype pdb
+output water_box.pdb
+add_box_sides 1.0         ## adds CRYST1 record automatically
+
+structure molstruct.pdb
+  number 100
+  inside box 0. 0. 0. 100. 10. 10.
+end structure
