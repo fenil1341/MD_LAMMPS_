@@ -1,5 +1,13 @@
+log.lammps
 ./h2o_KCl/packmol_files/water_kcl.data
 ./h2o/water_channel.data
 h2o\traj.lammpstrj
 h2o\log.lammps
 h2o_KCl\packmol_files\archive\h2o.data
+h2o_KCl/lammps/conc_Cl.txt
+h2o_KCl/lammps/conc_O.txt
+h2o_KCl/lammps/conc_total.txt
+h2o_KCl/lammps/conc_K.txt
+h2o_KCl/lammps/traj.lammpstrj
+h2o_KCl/lammps/log.lammps
+h2o_KCl/lammps/water_kcl.data
