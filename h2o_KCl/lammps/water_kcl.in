@@ -9,6 +9,9 @@
 # set type 3 charge  1.0      # K+
 # set type 4 charge -1.0      # Cl-
 
+package omp 4
+suffix omp
+
 units           real
 atom_style      full
 boundary        p p p       # Periodic in X (inlet/outlet), periodic in Y, fixed wall in Z
