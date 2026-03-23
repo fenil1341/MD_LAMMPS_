@@ -11,3 +11,8 @@ h2o_KCl/lammps/conc_K.txt
 h2o_KCl/lammps/traj.lammpstrj
 h2o_KCl/lammps/log.lammps
 h2o_KCl/lammps/water_kcl.data
+h2o_KCl/lammps/README
+h2o_KCl/Results
+concentration_profile.png
+concentration_vs_time.png
+energy_stability.png

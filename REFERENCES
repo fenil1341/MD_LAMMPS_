@@ -1,10 +1,20 @@
-1. PackMol - Initial Configuration of the molecules(.pdb file) for the simulation.
+1. PackMol:
 
+    Initial Configuration of the molecules(.pdb file) for the simulation.
     https://m3g.github.io/packmol/userguide.shtml 
+---
 
 2. TopoTools in VMD:
 
-    Axel Kohlmeyer & Josh Vermaas, (2019). TopoTools: Release 1.8
-    
+    Axel Kohlmeyer & Josh Vermaas, (2019). TopoTools: Release 1.8 -
     https://doi.org/10.5281/zenodo.598373
-3. 
+---
+
+3. LAMMPS Tutorial: 
+
+    https://lammpstutorials.github.io/sphinx/build/html/tutorial1/lennard-jones-fluid.html#
+---
+4. OpenMP Package: 
+
+    https://docs.lammps.org/Speed_omp.html
+---
