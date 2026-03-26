@@ -1,0 +1,8 @@
+# WORKFLOW OF THIS SIMULATION
+
+| Step | Directory Name | Use | 
+| :---: | :---: | :---: |
+| 1 | initialCreate  | Creates initial system  | 
+| 2 | equilibrate | until equilibrium | 
+| 3 | zeroShear  | after changing force values | 
+
