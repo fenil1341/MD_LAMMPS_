@@ -16,3 +16,6 @@ h2o_KCl/lammps/conc_K.txt
 h2o_KCl/lammps/log.lammps
 h2o_KCl/lammps/README
 h2o_KCl/Results
+
+plot_energies.py
+steadyStateTest/postProcessing.py
