@@ -25,7 +25,11 @@ fix_modify mynvt2 temp Twall
 
 fix myshk H2O shake 1.0e-5 200 0 b O-H a H-O-H
 fix myrct all recenter NULL NULL 0
-timestep 1.0
+fix myspring wall spring/self 10.0 xyz                  ## SPRING FORCE FOR THE IMMOBILE WALL
+
+
+fix myadf fluid addforce 3e-2 0.0 0.0                   ## FORCE ADDED
+
 
 #   fix mysf1 walltop setforce 0 NULL NULL
 #   fix mysf2 wallbot setforce 0 NULL NULL
@@ -36,8 +40,7 @@ timestep 1.0
 #    dump_modify mydmp backcolor white acolor O red adiam O 2 acolor H white adiam H 1 &
 #       acolor Na+ blue adiam Na+ 2.5 acolor Cl- cyan adiam Cl- 3 acolor WALL gray adiam WALL 3
 
-fix myadf fluid addforce 3e-2 0.0 0.0
-minimize      1.0e-4 1.0e-6 1000 100000
+# minimize      1.0e-4 1.0e-6 1000 100000
 
 
 
@@ -45,6 +48,11 @@ dump mydmp all atom 5000 dump.lammpstrj
 
 thermo 500
 thermo_modify temp Tfluid
+
+variable vcm_fluid equal vcm(fluid,x)                       ## VELOCITY CALCULATION IN THE X-DIR
+fix myat1 all ave/time 10 100 1000 v_vcm_fluid file vcm_fluid.dat           
+
+
 thermo_style custom step temp pe ke etotal press
 
 
@@ -59,5 +67,5 @@ cc2 density/mass vx file shearing-wall.dat
 fix myac3 ions ave/chunk 10 15000 200000 &
 cc3 density/mass vx file shearing-ions.dat
  
-
+timestep 1.0
 run 200000
