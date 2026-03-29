@@ -29,13 +29,14 @@ set type 2 charge -0.8476           # O
 
 # ============ FIXES ============
 fix fSHAKE all shake 1e-4 20 0 b 1 a 1
-fix fNVT all nvt temp 300 300 100
+# fix fNVT all nvt temp 300 300 100
+fix mynve all nve
 
 # ============ APPLIED FORCE (Poiseuille flow along X) ============
-fix fforce all addforce 0.001 0.0 0.0
+# fix fforce all addforce 0.001 0.0 0.0
 
 # ============ RUN ============
-timestep        1.0
+timestep        0.001
 thermo          1000
 thermo_style custom step temp pe ke etotal press
 dump            1 all atom 5000 traj_small.lammpstrj
@@ -53,4 +54,4 @@ minimize 1e-4 1e-6 1000 10000
 run             50000
 
 # Production
-run             100000
+# run             100000

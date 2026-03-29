@@ -6,7 +6,7 @@ timesteps = []
 KE = []
 PE = []
 
-with open(r'F:\sla_hiwi\lammps_testRuns\steadyStateTest\waterOnly\waterOnly_small\energy.txt', 'r') as f:
+with open(r'F:\sla_hiwi\lammps_testRuns\steadyStateTest\waterOnly\waterOnly_small\without_force\energy.txt', 'r') as f:
     lines = f.readlines()
 
 step = 0
@@ -32,7 +32,7 @@ KE = np.array(KE)/natoms
 PE = np.array(PE)/natoms
 
 
-base_path = r'F:\sla_hiwi\lammps_testRuns\steadyStateTest\waterOnly\waterOnly_small'
+base_path = r'F:\sla_hiwi\lammps_testRuns\steadyStateTest\waterOnly\waterOnly_small\without_force'
 
 fig, axes = plt.subplots(2, 2, figsize=(14, 10))
 fig.suptitle('Water Only - No Force (Steady State Check)', fontsize=15)
@@ -70,10 +70,10 @@ axes[1, 1].grid(True, alpha=0.3)
 
 
 # Plot Limits
-axes[0, 0].set_ylim(0, 1)    # KE vs Timestep
-axes[1, 0].set_ylim(0, 1)   # KE vs Timestep
-axes[0, 1].set_ylim(-5, -3)    # PE vs Time
-axes[1, 1].set_ylim(-5, -3)   # PE vs Time
+# axes[0, 0].set_ylim(0, 1)    # KE vs Timestep
+# axes[1, 0].set_ylim(0, 1)   # KE vs Timestep
+# axes[0, 1].set_ylim(-5, -3)    # PE vs Time
+# axes[1, 1].set_ylim(-5, -3)   # PE vs Time
 
 plt.tight_layout()
 plt.savefig(base_path + r'\energy_plots.png', dpi=150)
