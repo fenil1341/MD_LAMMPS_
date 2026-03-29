@@ -1,0 +1,66 @@
+package omp 2
+suffix omp
+
+units           real
+atom_style      full
+boundary        p p p
+
+read_data       water_kcl_small.data
+
+# ============ FORCE FIELD ============
+pair_style      lj/cut/coul/long 10.0
+
+# 1=CL, 2=H, 3=K, 4=O
+pair_coeff      1 1 0.0356 4.477    # Cl-Cl (Joung-Cheatham)
+pair_coeff      2 2 0.0    0.0      # H-H
+pair_coeff      3 3 0.1936 2.848    # K-K (Joung-Cheatham)
+pair_coeff      4 4 0.1553 3.166    # O-O (SPC/E)
+
+bond_style      harmonic
+bond_coeff      1 450.0 1.0         # O-H
+
+angle_style     harmonic
+angle_coeff     1 55.0 109.47       # H-O-H
+
+kspace_style    pppm 1e-4
+
+# ============ CHARGES ============
+set type 1 charge -1.0              # Cl-
+set type 2 charge  0.4238           # H
+set type 3 charge  1.0              # K+
+set type 4 charge -0.8476           # O
+
+# ============ GROUPS ============
+group oxygen   type 4
+group hydrogen type 2
+group potassium type 3
+group chloride type 1
+
+# ============ FIXES ============
+fix fSHAKE all shake 1e-4 20 0 b 1 a 1
+fix mynve all nve
+fix mylgv all langevin 300.0 300.0 100 10917
+
+# ============ ENERGY OUTPUT ============
+compute myKE all ke
+compute myPE all pe
+compute myTemp all temp
+variable KE equal c_myKE
+variable PE equal c_myPE
+variable Temp equal c_myTemp
+fix energy all print 1000 "$(step) ${KE} ${PE} ${Temp}" file energy.txt screen no
+
+# ============ RUN ============
+timestep        0.1
+thermo          1000
+thermo_style    custom step temp pe ke etotal press
+dump            1 all atom 5000 traj_kcl_small.lammpstrj
+
+# Minimization
+minimize 1e-4 1e-6 1000 10000
+
+# Equilibration
+run             50000
+
+# Production
+# run             100000
