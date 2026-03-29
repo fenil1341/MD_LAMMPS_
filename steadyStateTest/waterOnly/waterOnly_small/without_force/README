@@ -1,0 +1,42 @@
+# Simulation Plan
+
+### Step 1: Water only — NO force (baseline)
+
+- Run equilibrium simulation
+- Plot PE and KE vs time
+- This shows the system reaching steady state without any driving force
+
+### Step 2: Water only — WITH force
+
+- Add  `fix addforce 0.001 0.0 0.0`
+- Plot PE and KE vs time
+- Compare with Step 1 — does steady state change?
+- Plot velocity profile along Y (Poiseuille parabolic profile)
+
+### Step 3: Water + ions — NO force
+
+- Add K⁺ and Cl⁻ to the box with water
+- Same as Step 1 but with ions
+- Baseline for ion system
+
+### Step 4: Water + ions — WITH force
+
+- Add force again
+- Compare PE/KE with Step 2
+- Plot velocity profile — does it change with ions?
+
+---
+# System Details
+
+    No. of Molecules = 250
+    box size = 20 x 20 x 20.
+---
+# Input script 
+
+    bond_coeff      1 450.0 1.0         # O-H
+    angle_coeff     1 55.0 109.47       # H-O-H
+
+--> Basically this `450` value doesnt matter because I will use `SHAKE` model for water  geometry which will keep it rigid regardless of how stiff I keep it here. - Same goes for the Value0 `55`.  LAMMPS still requires them to be defined.
+
+
+

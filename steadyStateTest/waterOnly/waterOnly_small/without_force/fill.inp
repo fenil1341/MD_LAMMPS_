@@ -1,0 +1,8 @@
+tolerance 2.0
+filetype pdb
+output water_small.pdb
+
+structure water.pdb
+  number 250
+  inside box 0. 0. 0. 20. 20. 20.
+end structure
