@@ -1,0 +1,40 @@
+log equilibrate.log
+
+boundary p p f
+units real
+atom_style full
+bond_style harmonic
+angle_style harmonic
+pair_style lj/cut/tip4p/long O H O-H H-O-H 0.1546 12.0
+kspace_style pppm/tip4p 1.0e-5
+kspace_modify slab 3.0
+
+read_data create.data
+
+include parameters.inc
+include groups.inc
+
+fix myshk H2O shake 1.0e-5 200 0 b O-H a H-O-H kbond 2000
+
+thermo 1
+thermo_style custom step temp pe ke etotal press density
+
+minimize 1.0e-6 1.0e-6 1000 1000
+reset_timestep 0
+
+fix mynvt all nvt temp 300 300 100
+fix myshk H2O shake 1.0e-5 200 0 b O-H a H-O-H
+fix myrct all recenter NULL NULL 0
+timestep 0.5
+
+variable walltopz equal xcm(walltop,z)
+variable wallbotz equal xcm(wallbot,z)
+variable deltaz equal v_walltopz-v_wallbotz
+
+thermo 500
+thermo_style custom step temp pe ke etotal press density v_deltaz
+dump mydmp all atom 1000 equilibrium_dump.lammpstrj
+
+run 100000
+
+write_data equilibrate.data nocoeff
